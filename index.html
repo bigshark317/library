@@ -1,1 +1,164 @@
-<!doctype html><html lang=""><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="favicon.ico"><title>library</title><script defer="defer" type="module" src="js/chunk-vendors.e421a737.js"></script><script defer="defer" type="module" src="js/app.5a5e7a87.js"></script><link href="css/app.36b77786.css" rel="stylesheet"><script defer="defer" src="js/chunk-vendors-legacy.a0844121.js" nomodule></script><script defer="defer" src="js/app-legacy.af913139.js" nomodule></script></head><body><noscript><strong>We're sorry but library doesn't work properly without JavaScript enabled. Please enable it to continue.</strong></noscript><div id="app"></div></body></html>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Heart</title>
+
+    <style>
+        body {
+            background: rgb(204, 236, 245);
+            transform-style: preserve-3d;
+        }
+
+        .main {
+            width: 500px;
+            margin: 0px auto;
+            padding: 0;
+        }
+
+        #heart {
+            position: absolute;
+            left: center;
+            top: center;
+            margin: 20px;
+            perspective: 100px;
+        }
+
+        .rotateY {
+            transition: transform 2s;
+            animation: rotateY 6s infinite;
+        }
+
+        @keyframes rotateY {
+            0% {
+                transform: rotateY(0);
+            }
+
+            100% {
+                transform: rotateY(360deg);
+            }
+        }
+
+        #ball {
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            margin: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <canvas id="heart" class="rotateY" width="600" height="600"></canvas>
+        <canvas id="ball" width="600" height="600"></canvas>
+    </div>
+
+    <script>
+        function getHeartArr() {
+            let heartArr = [];
+            for (let i = 0; i <= Math.ceil(2 * Math.PI / 0.01); i++) {
+                let x = 16 * Math.pow(Math.sin(t), 3);
+                let y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+                t += 0.01;
+                heartArr.push([x * size, -y * size]);
+            }
+            return heartArr;
+        }
+        function draw() {
+            x = heartArr[idx][0];
+            y = heartArr[idx][1];
+            context.lineTo(x, y);
+            if (idx + 1 >= heartArr.length) {
+                context.fill();
+                clearTimeout(timer);
+            } else {
+                idx++;
+                clearTimeout(timer);
+                timer = setTimeout(draw, 2);
+                context.stroke();
+            }
+        }
+        let canvasHeart = document.querySelector('#heart');
+        let context = canvasHeart.getContext('2d');
+        context.lineWidth = 2;
+        context.translate(300, 300);
+        let t = 0;
+        let size = 15;
+        let x = 0;
+        let y = 0;
+        const heartArr = getHeartArr();
+        context.moveTo(heartArr[0][0], heartArr[0][1]);
+        let idx = 2;
+        context.fillStyle = '#c00';
+        context.strokeStyle = '#c00';
+        let timer = '';
+        draw();
+
+        class circle {
+            constructor(color, radius, v, angle, x, y) {
+                this.color = color;
+                this.radius = radius;
+                this.v = v;
+                this.angle = angle;
+                this.x = x;
+                this.y = y
+            }
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+                ctx.closePath();
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        let arr = [];
+        const CNT = 50;
+        let centerX, centerY;
+        let canvasBall = document.querySelector('#ball');
+        const ctx = canvasBall.getContext('2d');
+        console.log('context', canvasBall)
+        canvasBall.width = window.innerWidth;
+        canvasBall.height = window.innerHeight;
+        centerX = canvasBall.width / 2;
+        centerY = canvasBall.height / 2;
+        for (let i = 0; i < CNT; i++) {
+            let c1 = new circle(
+                "rgba(" + 255 * Math.random() + "," + 255 * Math.random() + "," + 255 * Math.random() + "," + Math.random() + ")",
+                66 * Math.random() + 1,
+                4 * Math.random() + 1,
+                360 * Math.random(),
+                centerX,
+                centerY
+            );
+            arr.push(c1);
+        }
+        function drawBall() {
+            ctx.clearRect(0, 0, canvasBall.width, canvasBall.height);
+            for (let i = 0; i < CNT; i++) {
+                arr[i].x += arr[i].v * Math.cos(arr[i].angle);
+                arr[i].y += arr[i].v * Math.sin(arr[i].angle);
+                if (arr[i].y < arr[i].radius) {
+                    arr[i].angle = 0 - arr[i].angle;
+                }
+                if (arr[i].y > (canvasBall.height - arr[i].radius)) {
+                    arr[i].angle = 0 - arr[i].angle;
+                }
+                if (arr[i].x < arr[i].radius) {
+                    arr[i].angle = Math.PI - arr[i].angle;
+                }
+                if (arr[i].x > (canvasBall.width - arr[i].radius)) {
+                    arr[i].angle = Math.PI - arr[i].angle;
+                }
+                arr[i].draw(ctx);
+            }
+            setTimeout(drawBall, 50);
+        }
+        drawBall();
+    </script>
+
+</body>
+
+</html>
